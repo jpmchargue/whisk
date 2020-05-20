@@ -2,6 +2,7 @@
 
 set -e
 
+# Download Gentle
 git submodule init
 git submodule update
 
@@ -11,6 +12,11 @@ echo "Installing Gentle dependencies..."
 apt-get install libopenblas-dev libopenblas-base python2.7
 echo "Gentle dependencies installed."
 
+# Perform setup for Gentle
 echo "Setting up Gentle. This will probably take a while."
 cd gentle && ./install.sh #> /dev/null 2>&1
+echo "Gentle setup complete!"
 
+# Install Whisk dependencies
+echo "Installing Whisk dependencies..."
+pip3 install pysimplegui pydub
