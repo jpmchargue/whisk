@@ -1,0 +1,1 @@
+python3 gentle/align.py mixes/soldier/streams/wannasee.wav mixes/soldier/transcripts/wannasee.txt

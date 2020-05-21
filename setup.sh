@@ -19,4 +19,5 @@ echo "Gentle setup complete!"
 
 # Install Whisk dependencies
 echo "Installing Whisk dependencies..."
-pip3 install pysimplegui pydub
+pip3 install python3-tk pysimplegui pydub pronouncing
+echo "Whisk dependencies installed."
