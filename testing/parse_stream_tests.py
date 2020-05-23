@@ -16,7 +16,7 @@ phonemes = []
 words = []
 
 # Alignment setup
-stream = "abox"
+stream = "tooeasy"
 resources = gentle.Resources()
 
 # Read transcript
