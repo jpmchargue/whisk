@@ -6,8 +6,8 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 projectName = "soldier"
-targetString = "I kid you not, he turns himself into a pickle. Funniest shit I've ever seen"
-saveName = "picklerick2"
+targetString = "whisk is a quick and easy tool for mixing sentences"
+saveName = "about"
 
 projectPath = 'mixes/' + projectName
 
@@ -37,7 +37,7 @@ def generateWordSequence(seq):
 				wordEnds.append(int(row[2]))
 			loc = findSubsequence(inputWords, seq)
 			if loc > -1: # the entire sequence was found intact
-				print('Found instance of "' + ' '.join(seq) + '"!')
+				print('Found instance of "' + ' '.join(seq) + '" at ' + wordDCFile + ':' + str(wordStarts[loc]) + ':' + str(wordEnds[loc + len(seq) - 1]) + '!')
 				sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
 				return (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], 1)
 	# if the sequence is only one word and it was not found, construct it
@@ -115,6 +115,9 @@ for sentence in temp.split(' *LONGPAUSE* '):
 		print('Assembling clause "' + clause + '"')
 		acc = acc + generateWordSequence(clause.split(' '))[0] + AudioSegment.silent(duration=200)
 	acc = acc + AudioSegment.silent(duration=500)
+
+# Padding
+acc = acc + AudioSegment.silent(duration=1000)
 
 play(acc)
 

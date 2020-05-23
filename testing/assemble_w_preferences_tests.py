@@ -7,8 +7,10 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 projectName = "soldier"
-targetString = "Whisk is a quick and easy tool for sentence mixing."
-saveName = "about"
+targetString = "I have become Death, destroyer of worlds."
+saveName = "beemovie"
+returnLongest = False
+doExport = False
 
 startTime = time.time()
 
@@ -35,6 +37,8 @@ def generateWordSequence(seq):
 	if seqString in wordLibrary:
 		return wordLibrary[seqString]
 
+	longest = (AudioSegment.silent(duration=1), 0)
+	secondLongest = (AudioSegment.silent(duration=1), 0)
 	for wordDCFile in os.listdir(projectPath + '/words'):
 		inputWords = []
 		wordStarts = []
@@ -48,10 +52,33 @@ def generateWordSequence(seq):
 			loc = findSubsequence(inputWords, seq)
 			if loc > -1: # the entire sequence was found intact
 				print('Found instance of "' + seqString + '"!')
-				sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
-				toReturn = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], 1)
-				wordLibrary[seqString] = toReturn
-				return toReturn
+				length = wordEnds[loc + len(seq) - 1] - wordStarts[loc]
+				if length > longest[1]:
+					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+					secondLongest = longest
+					longest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
+				elif length > secondLongest[1]:
+					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+					secondLongest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
+	
+	# Return the second-longest instance of the word.
+	# Generally, longer instances of words are better for mixes, as they tend to be spoken more clearly.
+	# However, Gentle's alignment has a few bugs, and what appears to be the longest instance of a word 
+	# is occasionally an incorrect outliar that 'stole' some of the following word.
+	# Using these buggy words produces low-quality results, since they introduce garbage syllables into the mix.
+	# So, to avoid this Whisk always attempts to use the second-longest instance of a word.
+	# If only one instance was found, it uses that.
+	if returnLongest is True:
+		if longest[1] > 0:
+			wordLibrary[seqString] = (longest[0], 1)
+			return (longest[0], 1)
+	else:
+		if secondLongest[1] > 0:
+			wordLibrary[seqString] = (secondLongest[0], 1)
+			return (secondLongest[0], 1)
+		elif longest[1] > 0:
+			wordLibrary[seqString] = (longest[0], 1)
+			return (longest[0], 1)
 
 	# if the sequence is only one word and it was not found, construct it
 	sequenceLength = len(seq)
@@ -64,7 +91,7 @@ def generateWordSequence(seq):
 			phonemeString = ''.join([c for c in options[0] if not c.isdigit()])
 			phonemeSequence = phonemeString.split(' ')
 			result = generatePhonemeSequence(phonemeSequence)
-			return (result[0] + AudioSegment.silent(duration=100), result[1])
+			return (result[0] + AudioSegment.silent(duration=75), result[1])
 	# multi-word sequence was not found in one piece- split and recurse
 	optimal = (AudioSegment.silent(duration=1), sys.maxsize)
 	for i in range(1, sequenceLength):
@@ -88,6 +115,7 @@ def generatePhonemeSequence(seq):
 		return phoneLibrary[seqString]
 
 	longest = (AudioSegment.silent(duration=1), 0)
+	secondLongest = (AudioSegment.silent(duration=1), 0)
 	for phoneDCFile in os.listdir(projectPath + '/phonemes'):
 		inputPhones = []
 		phoneStarts = []
@@ -104,11 +132,23 @@ def generatePhonemeSequence(seq):
 				print('Found instance of (' + ' '.join(seq) + ') with length: ' + str(length))
 				if length > longest[1]:
 					sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
+					secondLongest = longest
 					longest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
+				elif length > secondLongest[1]:
+					sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
+					secondLongest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
 	
-	if longest[1] > 0:
-		phoneLibrary[seqString] = (longest[0], 1)
-		return (longest[0], 1)
+	if returnLongest is True:
+		if longest[1] > 0:
+			phoneLibrary[seqString] = (longest[0], 1)
+			return (longest[0], 1)
+	else:
+		if secondLongest[1] > 0:
+			phoneLibrary[seqString] = (secondLongest[0], 1)
+			return (secondLongest[0], 1)
+		elif longest[1] > 0:
+			phoneLibrary[seqString] = (longest[0], 1)
+			return (longest[0], 1)
 	
 	sequenceLength = len(seq)
 	if sequenceLength <= 1:
@@ -151,5 +191,6 @@ print("SUCCESS! Mix completed in " + str(totalTime) + " seconds.")
 
 play(acc)
 
-acc.export(projectPath + "/outputs/" + saveName + ".wav", format="wav")
-print("The mix was exported successfully to " + projectPath + "/outputs/" + saveName + ".wav!")
+if doExport is True:
+	acc.export(projectPath + "/outputs/" + saveName + ".wav", format="wav")
+	print("The mix was exported successfully to " + projectPath + "/outputs/" + saveName + ".wav!")

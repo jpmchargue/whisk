@@ -16,7 +16,7 @@ phonemes = []
 words = []
 
 # Alignment setup
-stream = "tooeasy"
+stream = "Soldier_jeers06"
 resources = gentle.Resources()
 
 # Read transcript
@@ -29,7 +29,7 @@ with gentle.resampled(projectPath + "/streams/" + stream + ".wav") as wavfile:
     result = aligner.transcribe(wavfile)
 
 # JSON output for debugging
-#print(result.to_json(indent=2))
+print(result.to_json(indent=2))
 
 # Read the result, and save the data to the temporary project library
 
