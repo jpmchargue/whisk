@@ -7,8 +7,8 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 projectName = "soldier"
-targetString = "I have become Death, destroyer of worlds."
-saveName = "beemovie"
+targetString = "What is going on, drama alert nation, I'm your host, killer key hem star"
+saveName = "sick"
 returnLongest = False
 doExport = False
 
@@ -39,6 +39,7 @@ def generateWordSequence(seq):
 
 	longest = (AudioSegment.silent(duration=1), 0)
 	secondLongest = (AudioSegment.silent(duration=1), 0)
+	shortest = (AudioSegment.silent(duration=1), sys.maxsize)
 	for wordDCFile in os.listdir(projectPath + '/words'):
 		inputWords = []
 		wordStarts = []
@@ -53,6 +54,9 @@ def generateWordSequence(seq):
 			if loc > -1: # the entire sequence was found intact
 				print('Found instance of "' + seqString + '"!')
 				length = wordEnds[loc + len(seq) - 1] - wordStarts[loc]
+				if length < shortest[1]:
+					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+					shortest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
 				if length > longest[1]:
 					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
 					secondLongest = longest
@@ -73,7 +77,7 @@ def generateWordSequence(seq):
 			wordLibrary[seqString] = (longest[0], 1)
 			return (longest[0], 1)
 	else:
-		if secondLongest[1] > 0:
+		if secondLongest[1] > 0 and secondLongest[1] != shortest[1]:
 			wordLibrary[seqString] = (secondLongest[0], 1)
 			return (secondLongest[0], 1)
 		elif longest[1] > 0:
