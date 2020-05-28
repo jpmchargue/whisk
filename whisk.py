@@ -79,6 +79,8 @@ def importStream(project, streamPath):
 	elif fileType == "mp3":
 		subprocess.call(['ffmpeg', '-i', streamPath, 'mixes/' + project + '/streams/' + fileName + '.wav'])
 		return 1
+	else:
+		print(streamPath + " cannot be imported-- Whisk can only import .wav and .mp3 files.")
 	return 0
 	
 def importStreamFolder(project, streamFolderPath):
@@ -96,7 +98,12 @@ def importTranscript(project, transcriptPath):
 def importTranscriptFolder(project, transcriptFolderPath):
 	for transcript in os.listdir(transcriptFolderPath):
 		importTranscript(project, transcriptFolderPath + '/' + transcript)
-	
+
+def parseAllInFolder(project, ogStreamFolder):
+	for stream in os.listdir(ogStreamFolder):
+		name = stream.split('.')[0]
+		parseStream(project, name)
+
 def createTranscript(project, streamName, text):
 	with open('mixes/' + project + '/transcripts/' + streamName + '.txt', 'w') as transcript:
 		transcript.write(text)
@@ -129,19 +136,20 @@ def generateWordSequence(seq, window):
 				wordEnds.append(int(row[2]))
 			loc = findSubsequence(inputWords, seq)
 			if loc > -1: # the entire sequence was found intact
-				print('Found instance of "' + seqString + '"!')
-				window.refresh() # I hate that I have to do this, but it works
 				length = wordEnds[loc + len(seq) - 1] - wordStarts[loc]
-				if length < shortest[1]:
-					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
-					shortest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
-				if length > longest[1]:
-					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
-					secondLongest = longest
-					longest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
-				elif length > secondLongest[1]:
-					sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
-					secondLongest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
+				print('Found instance of "' + seqString + '" in ' + wordDCFile + ' of length ' + str(length) + '!')
+				window.refresh() # I hate that I have to do this, but it works
+				if length >= 100:
+					if length < shortest[1]:
+						sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+						shortest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
+					if length > longest[1]:
+						sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+						secondLongest = longest
+						longest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
+					elif length > secondLongest[1]:
+						sound = AudioSegment.from_wav(projectPath + "/streams/" + wordDCFile + ".wav")
+						secondLongest = (sound[wordStarts[loc]:wordEnds[loc + len(seq) - 1]], length)
 	
 	# Return the second-longest instance of the word.
 	# Generally, longer instances of words are better for mixes, as they tend to be spoken more clearly.
@@ -205,13 +213,14 @@ def generatePhonemeSequence(seq, window):
 				length = phoneEnds[loc + len(seq) - 1] - phoneStarts[loc]
 				print('Found instance of (' + ' '.join(seq) + ') with length: ' + str(length))
 				window.refresh()
-				if length > longest[1]:
-					sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
-					secondLongest = longest
-					longest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
-				elif length > secondLongest[1]:
-					sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
-					secondLongest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
+				if length >= (70 * len(seq)):
+					if length > longest[1]:
+						sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
+						secondLongest = longest
+						longest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
+					elif length > secondLongest[1]:
+						sound = AudioSegment.from_wav(projectPath + "/streams/" + phoneDCFile + ".wav")
+						secondLongest = (sound[phoneStarts[loc]:phoneEnds[loc + len(seq) - 1]], length)
 	
 	if returnLongest is True:
 		if longest[1] > 0:
@@ -248,6 +257,11 @@ def assembleMix(projectName, targetString, rL, doExport, saveName, window):
 	projectPath = 'mixes/' + projectName
 	wordLibrary = {}
 	phoneLibrary = {}
+	
+	if doExport is True and saveName == '':
+		print("Export failed-- file name cannot be blank.")
+		window.refresh()
+		return
 	
 	# Clean up and/or mark punctuation
 	temp = targetString.upper()
