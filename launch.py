@@ -5,6 +5,7 @@ import whisk
 tabsize = (150, 20)
 defaultFont = "Verdana"
 headerFont = "Tahoma"
+gui.theme("DarkBlue2")
 
 project = "soldier_from_tf2"
 
@@ -77,21 +78,33 @@ tab3_layout = [
 		[gui.Text(' ', font=(defaultFont, 2))],# padding
 		[gui.Text(' Enter your desired message below.', font=(defaultFont, 20), justification='left')],
 		[gui.Multiline(size=(150, 10))],
-		[gui.Text(' ', size=(48,1)), gui.Checkbox(' Use longest instance of sounds')],
-		[gui.Text("By default, Whisk generally uses the second-longest instance of words and phonemes, as the 'longest' instance of a sound is occasionally a sound that was\nincorrectly extended due to a glitch in Gentle.")],
-		[gui.Text("However, when no errors are present, using the longest instance of sounds can sometimes result in a clearer mix.")],
+		[gui.Text(' ', size=(48,1)), gui.Checkbox(' Use second-longest instance of sounds')],
+		[gui.Text("By default, Whisk generally uses the longest instance of words and phonemes. However, the 'longest' instance of a sound is occasionally a sound that was\nincorrectly extended due to a glitch in Gentle.")],
+		[gui.Text("If this occurs, the above box can be checked to use the second-longest instance of each sound instead.")],
 		[gui.Text('Export File Name', size=(34, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText()],
 		[gui.Button('Preview'), gui.Button('Export')]
                ]
 
 layout = [
-	[gui.Text(project, font=(defaultFont, 32), justification='left')],
+	[gui.Text(project, font=(defaultFont, 32), justification='left', key='_PROJECT_TITLE_'), gui.Button('Close Project')],
 	[gui.TabGroup([[gui.Tab(' Inputs ', tab1_layout), gui.Tab(' Library ', tab2_layout), gui.Tab(' Output ', tab3_layout)]], font=(headerFont, 30))],
 	[gui.Output(size=(150, 16))]
 	]
 
-window = gui.Window("Whisk", layout, finalize=True)
+projectsFound = [d for d in os.listdir('mixes') if os.path.isdir(os.getcwd() + '/mixes/' + d)]
+
+home_layout = [
+		[gui.Text("Whisk", font=(headerFont, 60))],
+		[gui.Text('New Project Name', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText(font=(defaultFont, 12)), gui.Button('+ New Project')],
+		[gui.Listbox(values = projectsFound, size=(110, 5), font=(defaultFont, 30), enable_events=True, key='_PROJECTS_')],
+		[gui.Text('Path', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText()],
+		[gui.Button('Open'), gui.Button('Delete')]
+	]
+
+
+window = gui.Window("Whisk", home_layout, finalize=True)
 window.Size = (960,720)
+
 
 while True:
 	event, values = window.read()
@@ -126,7 +139,7 @@ while True:
 			window.refresh() 
 	elif event == 'Preview':
 		try:
-			whisk.assembleMix(project, values[5][:-1], values[6], False, 'nil', window)
+			whisk.assembleMix(project, values[5][:-1], not values[6], False, 'nil', window)
 			#print(values)
 		except ValueError as e:
 			print(e)
@@ -134,11 +147,22 @@ while True:
 		window.refresh()
 	elif event == 'Export':
 		try:
-			whisk.assembleMix(project, values[5][:-1], values[6], True, values[7], window)
+			whisk.assembleMix(project, values[5][:-1], not values[6], True, values[7], window)
 		except ValueError as e:
 			print(e)
 			print("Mix assembly failed.")
 		window.refresh()
+	elif event == 'Close Project':
+		window.close()
+		window = gui.Window("Whisk", home_layout, finalize=True)
+		window.Size = (960, 540)
+		window.refresh()
+	elif event == 'Open':
+		project = values['_PROJECTS_'][0]
+		print(project)
+		window.close()
+		window = gui.Window("Whisk", layout, finalize=True)
+		window['_PROJECT_TITLE_'].Update(value = project)
 	else:
 		print(event)
 		window.refresh()
