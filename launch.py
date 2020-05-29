@@ -95,15 +95,16 @@ projectsFound = [d for d in os.listdir('mixes') if os.path.isdir(os.getcwd() + '
 
 home_layout = [
 		[gui.Text("Whisk", font=(headerFont, 60))],
-		[gui.Text('New Project Name', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText(font=(defaultFont, 12)), gui.Button('+ New Project')],
+		[gui.Text('New Project Name', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right', key='_NEWNAME_'), gui.InputText(font=(defaultFont, 12)), gui.Button('+ New Project')],
 		[gui.Listbox(values = projectsFound, size=(110, 5), font=(defaultFont, 30), enable_events=True, key='_PROJECTS_')],
-		[gui.Text('Path', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText()],
-		[gui.Button('Open'), gui.Button('Delete')]
+		#[gui.Text('Path', size=(15, 1), font=(defaultFont, 12), auto_size_text=False, justification='right'), gui.InputText()],
+		[gui.Text(' ', font=(defaultFont, 4))],# padding
+		[gui.Button('Open')]#, gui.Button('Delete')
 	]
 
 
 window = gui.Window("Whisk", home_layout, finalize=True)
-window.Size = (960,720)
+window.Size = (960,540)
 
 
 while True:
@@ -126,8 +127,8 @@ while True:
 			window.refresh() 
 	elif event == 'Import folders':
 		try:
-			whisk.importStreamFolder(project, values['Browse0'])
 			whisk.importTranscriptFolder(project, values['Browse1'])
+			whisk.importStreamFolder(project, values['Browse0'], window)
 			print("Imports from '" + values['Browse0'] + "' and '" + values['Browse1'] + "' successful.")
 			window.refresh()
 			whisk.parseAllInFolder(project, values['Browse0'])
@@ -154,15 +155,25 @@ while True:
 		window.refresh()
 	elif event == 'Close Project':
 		window.close()
-		window = gui.Window("Whisk", home_layout, finalize=True)
-		window.Size = (960, 540)
-		window.refresh()
+		#window = gui.Window("Whisk", home_layout, finalize=True)
+		#window.Size = (960, 540)
+		#window.refresh()
 	elif event == 'Open':
-		project = values['_PROJECTS_'][0]
-		print(project)
+		if len(values['_PROJECTS_']) > 0:
+			project = values['_PROJECTS_'][0]
+			#print(project)
+			window.close()
+			window = gui.Window("Whisk", layout, finalize=True)
+			window.Size = (960,720)
+			window['_PROJECT_TITLE_'].Update(value = project)
+			refreshLibrary()
+	elif event == '+ New Project':
+		whisk.setUpProject(values[0])
+		project = values[0]
 		window.close()
 		window = gui.Window("Whisk", layout, finalize=True)
 		window['_PROJECT_TITLE_'].Update(value = project)
+		refreshLibrary()
 	else:
 		print(event)
 		window.refresh()

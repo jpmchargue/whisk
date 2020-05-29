@@ -71,6 +71,7 @@ def parseStream(project, name):
 		wordFile.close()
 
 def importStream(project, streamPath):
+	print("Importing " + streamPath + "...")
 	fileName = streamPath.split('/')[-1].split('.')[0]
 	fileType = streamPath.split('.')[-1]
 	if fileType == "wav":
@@ -83,9 +84,14 @@ def importStream(project, streamPath):
 		print(streamPath + " cannot be imported-- Whisk can only import .wav and .mp3 files.")
 	return 0
 	
-def importStreamFolder(project, streamFolderPath):
+# This function must be run after importTranscriptFolder().
+def importStreamFolder(project, streamFolderPath, window):
+	print("Importing " + streamFolderPath + "...")
+	window.refresh()
 	for stream in os.listdir(streamFolderPath):
 		importStream(project, streamFolderPath + '/' + stream)
+		window.refresh()
+		parseStream(project, stream.split('.')[0])
 		
 def importTranscript(project, transcriptPath):
 	fileName = transcriptPath.split('/')[-1].split('.')[0]
