@@ -12,12 +12,15 @@ echo "Installing Gentle dependencies..."
 apt-get install libopenblas-dev libopenblas-base python2.7
 echo "Gentle dependencies installed."
 
-# Perform setup for Gentle
-echo "Setting up Gentle. This will probably take a while."
-cd gentle && ./install.sh #> /dev/null 2>&1
-echo "Gentle setup complete!"
-
 # Install Whisk dependencies
 echo "Installing Whisk dependencies..."
-pip3 install python3-tk pysimplegui pydub pronouncing
+apt-get install python3-tk
+pip3 install PySimpleGUI pydub pronouncing
 echo "Whisk dependencies installed."
+
+# Perform setup for Gentle
+echo "Whisk is about to set up Gentle. This will probably take a while."
+echo "Press any key to continue..."
+read -n 1 -s
+cd gentle && ./install.sh #> /dev/null 2>&1
+echo "Gentle setup complete!"
