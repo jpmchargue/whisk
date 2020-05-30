@@ -14,7 +14,7 @@ echo "Gentle dependencies installed."
 
 # Install Whisk dependencies
 echo "Installing Whisk dependencies..."
-apt-get install python3-tk
+apt-get install python3-tk python3-pip
 pip3 install PySimpleGUI pydub pronouncing
 echo "Whisk dependencies installed."
 
