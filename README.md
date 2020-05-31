@@ -1,9 +1,9 @@
 # Whisk 
-Whisk is an automatic, lightweight sentence mixer built on Gentle and Pydub, written primarily in Python.
+Whisk is an automatic, lightweight sentence mixer for Linux built on Gentle and Pydub, written primarily in Python.
 It can be used both as an application and a library (via whisk.py).
 
 ## Quick Setup
-The setup below has been tested on a fresh install of Ubuntu 20.04.
+The setup below has been tested on a fresh install of Ubuntu 20.04.<br>
 *I haven't been able to thoroughly test the setup process yet, so this process may not work universally!*
 1. Save the Whisk repository to your device using *git clone*:
 	* Navigate to the folder where you'd like to build Whisk.
