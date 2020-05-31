@@ -14,3 +14,6 @@ The setup below has been tested on a fresh install of Ubuntu 20.04.<br>
 1. Run *sudo ./setup.sh*. This will install Gentle and its dependencies, and will take a while to finish.
 	* If the setup script terminates with an error message about 'kaldi.mk', **don't worry.**  That error only affects the web browser interface for Gentle, which Whisk doesn't use.
 1. Once that completes, run *python3 launch.py* to launch Whisk.
+
+## Crediting
+Whisk is distributed under the MIT License, so you can freely use it in any manner for any purpose, personal or commercial.  **However, if you post mixes made with Whisk online, I would deeply appreciate it if you mention Whisk or me (jpmchargue) alongside it!**  It lets others know about the program, and, since I can't see the number of times Whisk has been cloned, it gives me a general idea of how much it's being used.
